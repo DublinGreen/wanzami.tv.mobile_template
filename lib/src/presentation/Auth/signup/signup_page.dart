@@ -188,7 +188,7 @@ class _SignUpPageState extends State<SignUpPage> {
                             isAcceptPrivicay = newValue!;
                           });
                         },
-                        side: MaterialStateBorderSide.resolveWith(
+                        side: WidgetStateBorderSide.resolveWith(
                           (states) =>
                               const BorderSide(width: 2.0, color: Colors.white),
                         ),

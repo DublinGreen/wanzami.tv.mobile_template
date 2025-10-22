@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class AppColor {
   const AppColor._();
 
-  static const pinkColor = Color.fromRGBO(254, 9, 114, 1);
+  static const pinkColor = Color.fromRGBO(235, 78, 4, 1);
   static const backgroundColor = Color.fromRGBO(10, 11, 16, 1);
 
   static const linearGradientPrimary = LinearGradient(

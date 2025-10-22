@@ -1,11 +1,7 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:video_stream_clone/src/core/app_color.dart';
 import 'package:video_stream_clone/src/core/app_const.dart';
-import 'package:video_stream_clone/src/core/app_extension.dart';
 import 'package:video_stream_clone/src/presentation/Movies/movies_page.dart';
-import 'package:video_stream_clone/src/presentation/sports/sports_page.dart';
 
 class TvEventsPage extends StatefulWidget {
   const TvEventsPage({super.key});

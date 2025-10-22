@@ -195,7 +195,7 @@ class _SignInPageState extends State<SignInPage> {
                             isAcceptPrivicay = newValue!;
                           });
                         },
-                        side: MaterialStateBorderSide.resolveWith(
+                        side: WidgetStateBorderSide.resolveWith(
                           (states) =>
                               const BorderSide(width: 2.0, color: Colors.white),
                         ),

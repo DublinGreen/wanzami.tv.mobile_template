@@ -91,7 +91,7 @@ class _SwitchTileState extends State<SwitchTile> {
                 Transform.scale(
                     scale: 0.8,
                     child: Switch(
-                        activeColor: AppColor.pinkColor,
+                        activeThumbColor: AppColor.pinkColor,
                         value: isActive,
                         onChanged: (value) {
                           setState(() {
