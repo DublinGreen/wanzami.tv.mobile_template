@@ -28,6 +28,7 @@ class _SignInPageState extends State<SignInPage> {
 
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
 
   // GraphQL mutation string
   static const String loginMutation = r'''
@@ -39,7 +40,7 @@ class _SignInPageState extends State<SignInPage> {
   Future<void> loginUser() async {
     setState(() => isLoading = true);
 
-    final HttpLink httpLink = HttpLink('https://auth.wanzami.tv/graphql');
+    final HttpLink httpLink = HttpLink('http://localhost:5000/graphql');
     final GraphQLClient client = GraphQLClient(
       link: httpLink,
       cache: GraphQLCache(),
@@ -114,270 +115,301 @@ class _SignInPageState extends State<SignInPage> {
         body: Padding(
           padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 30.h),
           child: SingleChildScrollView(
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    const Text(
-                      "Sign in to continue",
-                      style: TextStyle(
-                          fontFamily: fontFamily,
-                          fontSize: 23,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold),
-                    ),
-                    const Spacer(),
-                    InkWell(
-                      onTap: () {
-                        Navigator.pushReplacement(
-                            context, CustomRouter(widget: const MainPage()));
-                      },
-                      child: ShaderMask(
-                        shaderCallback: (rect) {
-                          return AppColor.linearGradientPrimary.createShader(rect);
-                        },
-                        child: const Text(
-                          'Skip',
-                          style: TextStyle(
-                            fontFamily: fontFamily,
-                            fontSize: 16.5,
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 40.h),
-                Transform.scale(
-                  scaleY: 0.9,
-                  child: TextField(
-                    controller: emailController,
-                    cursorColor: Colors.white,
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: InputDecoration(
-                      isDense: true,
-                      hintText: 'Email',
-                      hintStyle: const TextStyle(
-                          color: Colors.white,
-                          fontFamily: fontFamily,
-                          fontWeight: FontWeight.w100,
-                          fontSize: 17),
-                      prefixIcon: Transform.scale(
-                          scale: 0.7,
-                          child: Image.asset("assets/icons/ic_email.png")),
-                      filled: true,
-                      fillColor: const Color.fromRGBO(54, 61, 80, 1),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(7.0),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(height: 10.h),
-                Transform.scale(
-                  scaleY: 0.9,
-                  child: TextField(
-                    controller: passwordController,
-                    obscureText: true,
-                    cursorColor: Colors.white,
-                    keyboardType: TextInputType.visiblePassword,
-                    decoration: InputDecoration(
-                      isDense: true,
-                      hintText: 'Password',
-                      hintStyle: const TextStyle(
-                          color: Colors.white,
-                          fontFamily: fontFamily,
-                          fontWeight: FontWeight.w100,
-                          fontSize: 17),
-                      prefixIcon: Transform.scale(
-                          scale: 0.7,
-                          child: Image.asset("assets/icons/ic_password.png")),
-                      filled: true,
-                      fillColor: const Color.fromRGBO(54, 61, 80, 1),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(7.0),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(height: 20.h),
-                Row(
-                  children: [
-                    MSHCheckbox(
-                      size: 20,
-                      value: isRememberMe,
-                      colorConfig:
-                          MSHColorConfig.fromCheckedUncheckedDisabled(
-                        checkedColor: AppColor.pinkColor,
-                      ),
-                      style: MSHCheckboxStyle.fillScaleColor,
-                      onChanged: (selected) {
-                        setState(() {
-                          isRememberMe = selected;
-                        });
-                      },
-                    ),
-                    SizedBox(width: 10.w),
-                    const Text(
-                      'Remember Me',
-                      style: TextStyle(
-                        fontFamily: fontFamily,
-                        fontSize: 13.7,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const Spacer(),
-                    const Text(
-                      'Forgot Password ?',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontFamily: fontFamily,
-                        fontSize: 13.7,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 10.h),
-                Transform.translate(
-                  offset: Offset(-8.w, 0),
-                  child: Row(
+            child: Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  Row(
                     children: [
-                      Checkbox(
-                        value: isAcceptPrivicay,
-                        onChanged: (newValue) {
-                          setState(() {
-                            isAcceptPrivicay = newValue!;
-                          });
-                        },
-                        side: WidgetStateBorderSide.resolveWith(
-                          (states) =>
-                              const BorderSide(width: 2.0, color: Colors.white),
-                        ),
-                        checkColor: Colors.black,
-                        activeColor: Colors.white,
+                      const Text(
+                        "Sign in to continue",
+                        style: TextStyle(
+                            fontFamily: fontFamily,
+                            fontSize: 23,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold),
                       ),
-                      Expanded(
-                        child: RichText(
-                          text: TextSpan(
-                            style: const TextStyle(
-                                fontFamily: fontFamily,
-                                fontSize: 15.5,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.white),
-                            children: [
-                              const TextSpan(text: 'By Signing in you accept '),
-                              TextSpan(
-                                text: 'Terms',
-                                style: const TextStyle(
-                                    color: AppColor.pinkColor,
-                                    decoration: TextDecoration.underline),
-                                recognizer: TapGestureRecognizer()..onTap = () {},
-                              ),
-                              const TextSpan(text: ' and '),
-                              TextSpan(
-                                text: 'Privacy Policy',
-                                style: const TextStyle(
-                                    color: Colors.pink,
-                                    decoration: TextDecoration.underline),
-                                recognizer: TapGestureRecognizer()..onTap = () {},
-                              ),
-                            ],
+                      const Spacer(),
+                      InkWell(
+                        onTap: () {
+                          Navigator.pushReplacement(
+                              context, CustomRouter(widget: const MainPage()));
+                        },
+                        child: ShaderMask(
+                          shaderCallback: (rect) {
+                            return AppColor.linearGradientPrimary.createShader(rect);
+                          },
+                          child: const Text(
+                            'Skip',
+                            style: TextStyle(
+                              fontFamily: fontFamily,
+                              fontSize: 16.5,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),
                     ],
                   ),
-                ),
-                SizedBox(height: 30.h),
-                CustomPrimaryButton(
-                  text: isLoading ? "LOADING..." : "LOGIN",
-                  onTap: () {
-                    if (!isLoading) {
-                      loginUser();
-                    }
-                  },
-                ),
-                SizedBox(height: 20.h),
-                const Text(
-                  'Or Continue with',
-                  style: TextStyle(
-                    fontFamily: fontFamily,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.white,
-                  ),
-                ),
-                SizedBox(height: 20.h),
-                Row(
-                  children: [
-                    SignInSocialButton(
-                      mainColor: const Color.fromRGBO(56, 125, 242, 1),
-                      subColor: const Color.fromRGBO(81, 142, 248, 1),
-                      text: 'Facebook',
-                      onTap: () {},
-                      icon: FontAwesomeIcons.facebookF,
-                    ),
-                    SizedBox(width: 20.w),
-                    SignInSocialButton(
-                      mainColor: const Color.fromRGBO(209, 54, 42, 1),
-                      subColor: const Color.fromRGBO(241, 68, 54, 1),
-                      text: 'Google',
-                      icon: FontAwesomeIcons.google,
-                      onTap: () {},
-                    ),
-                  ],
-                ),
-                SizedBox(height: 50.h),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text(
-                      "Already have an account?",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontFamily: fontFamily,
-                        fontSize: 13.3,
-                        color: Colors.white,
+                  SizedBox(height: 40.h),
+
+                  // EMAIL FIELD
+                  Transform.scale(
+                    scaleY: 0.9,
+                    child: TextFormField(
+                      controller: emailController,
+                      cursorColor: Colors.white,
+                      keyboardType: TextInputType.emailAddress,
+                      style: const TextStyle(color: Colors.white),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Email is required';
+                        }
+                        final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                        if (!emailRegex.hasMatch(value.trim())) {
+                          return 'Enter a valid email';
+                        }
+                        return null;
+                      },
+                      decoration: InputDecoration(
+                        isDense: true,
+                        hintText: 'Email',
+                        hintStyle: const TextStyle(
+                            color: Colors.white70,
+                            fontFamily: fontFamily,
+                            fontWeight: FontWeight.w100,
+                            fontSize: 17),
+                        prefixIcon: Transform.scale(
+                            scale: 0.7,
+                            child: Image.asset("assets/icons/ic_email.png")),
+                        filled: true,
+                        fillColor: const Color.fromRGBO(54, 61, 80, 1),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(7.0),
+                          borderSide: BorderSide.none,
+                        ),
+                        errorStyle: const TextStyle(color: Colors.redAccent),
                       ),
                     ),
-                    SizedBox(width: 10.w),
-                    InkWell(
-                      onTap: () {
-                        Navigator.push(context,
-                            CustomRouter(widget: const SignUpPage()));
+                  ),
+                  SizedBox(height: 10.h),
+
+                  // PASSWORD FIELD
+                  Transform.scale(
+                    scaleY: 0.9,
+                    child: TextFormField(
+                      controller: passwordController,
+                      obscureText: true,
+                      cursorColor: Colors.white,
+                      keyboardType: TextInputType.visiblePassword,
+                      style: const TextStyle(color: Colors.white),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Password is required';
+                        }
+                        if (value.length < 6) {
+                          return 'Password must be at least 6 characters';
+                        }
+                        return null;
                       },
-                      child: ShaderMask(
-                        shaderCallback: (rect) {
-                          return AppColor.linearGradientPrimary.createShader(rect);
+                      decoration: InputDecoration(
+                        isDense: true,
+                        hintText: 'Password',
+                        hintStyle: const TextStyle(
+                            color: Colors.white70,
+                            fontFamily: fontFamily,
+                            fontWeight: FontWeight.w100,
+                            fontSize: 17),
+                        prefixIcon: Transform.scale(
+                            scale: 0.7,
+                            child: Image.asset("assets/icons/ic_password.png")),
+                        filled: true,
+                        fillColor: const Color.fromRGBO(54, 61, 80, 1),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(7.0),
+                          borderSide: BorderSide.none,
+                        ),
+                        errorStyle: const TextStyle(color: Colors.redAccent),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 20.h),
+
+                  Row(
+                    children: [
+                      MSHCheckbox(
+                        size: 20,
+                        value: isRememberMe,
+                        colorConfig:
+                            MSHColorConfig.fromCheckedUncheckedDisabled(
+                          checkedColor: AppColor.pinkColor,
+                        ),
+                        style: MSHCheckboxStyle.fillScaleColor,
+                        onChanged: (selected) {
+                          setState(() {
+                            isRememberMe = selected;
+                          });
                         },
-                        child: const Text(
-                          'Sign Up',
-                          style: TextStyle(
-                              fontFamily: fontFamily,
-                              fontSize: 16.5,
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(width: 10.w),
+                      const Text(
+                        'Remember Me',
+                        style: TextStyle(
+                          fontFamily: fontFamily,
+                          fontSize: 13.7,
+                          color: Colors.white,
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 10.h),
-                Center(
-                  child: Container(
-                    width: context.width / 3.5,
-                    height: 3.h,
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(3),
-                        gradient: AppColor.linearGradientPrimary),
+                      const Spacer(),
+                      const Text(
+                        'Forgot Password ?',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontFamily: fontFamily,
+                          fontSize: 13.7,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
                   ),
-                )
-              ],
+                  SizedBox(height: 10.h),
+                  Transform.translate(
+                    offset: Offset(-8.w, 0),
+                    child: Row(
+                      children: [
+                        Checkbox(
+                          value: isAcceptPrivicay,
+                          onChanged: (newValue) {
+                            setState(() {
+                              isAcceptPrivicay = newValue!;
+                            });
+                          },
+                          side: WidgetStateBorderSide.resolveWith(
+                            (states) =>
+                                const BorderSide(width: 2.0, color: Colors.white),
+                          ),
+                          checkColor: Colors.black,
+                          activeColor: Colors.white,
+                        ),
+                        Expanded(
+                          child: RichText(
+                            text: TextSpan(
+                              style: const TextStyle(
+                                  fontFamily: fontFamily,
+                                  fontSize: 15.5,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.white),
+                              children: [
+                                const TextSpan(text: 'By Signing in you accept '),
+                                TextSpan(
+                                  text: 'Terms',
+                                  style: const TextStyle(
+                                      color: AppColor.pinkColor,
+                                      decoration: TextDecoration.underline),
+                                  recognizer: TapGestureRecognizer()..onTap = () {},
+                                ),
+                                const TextSpan(text: ' and '),
+                                TextSpan(
+                                  text: 'Privacy Policy',
+                                  style: const TextStyle(
+                                      color: Colors.pink,
+                                      decoration: TextDecoration.underline),
+                                  recognizer: TapGestureRecognizer()..onTap = () {},
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 30.h),
+                  CustomPrimaryButton(
+                    text: isLoading ? "LOADING..." : "LOGIN",
+                    onTap: () {
+                      if (!isLoading && (_formKey.currentState?.validate() ?? false)) {
+                        loginUser();
+                      }
+                    },
+                  ),
+                  SizedBox(height: 20.h),
+                  const Text(
+                    'Or Continue with',
+                    style: TextStyle(
+                      fontFamily: fontFamily,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.white,
+                    ),
+                  ),
+                  SizedBox(height: 20.h),
+                  Row(
+                    children: [
+                      SignInSocialButton(
+                        mainColor: const Color.fromRGBO(56, 125, 242, 1),
+                        subColor: const Color.fromRGBO(81, 142, 248, 1),
+                        text: 'Facebook',
+                        onTap: () {},
+                        icon: FontAwesomeIcons.facebookF,
+                      ),
+                      SizedBox(width: 20.w),
+                      SignInSocialButton(
+                        mainColor: const Color.fromRGBO(209, 54, 42, 1),
+                        subColor: const Color.fromRGBO(241, 68, 54, 1),
+                        text: 'Google',
+                        icon: FontAwesomeIcons.google,
+                        onTap: () {},
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 50.h),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                        "Already have an account?",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontFamily: fontFamily,
+                          fontSize: 13.3,
+                          color: Colors.white,
+                        ),
+                      ),
+                      SizedBox(width: 10.w),
+                      InkWell(
+                        onTap: () {
+                          Navigator.push(context,
+                              CustomRouter(widget: const SignUpPage()));
+                        },
+                        child: ShaderMask(
+                          shaderCallback: (rect) {
+                            return AppColor.linearGradientPrimary.createShader(rect);
+                          },
+                          child: const Text(
+                            'Sign Up',
+                            style: TextStyle(
+                                fontFamily: fontFamily,
+                                fontSize: 16.5,
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 10.h),
+                  Center(
+                    child: Container(
+                      width: context.width / 3.5,
+                      height: 3.h,
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(3),
+                          gradient: AppColor.linearGradientPrimary),
+                    ),
+                  )
+                ],
+              ),
             ),
           ),
         ),
