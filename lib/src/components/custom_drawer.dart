@@ -76,7 +76,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                               width: 140.w,
                               child: Marquee(
                                 text:
-                                    'TKDS SPORTS                                 ',
+                                    'Wanzami Entertainment                                ',
                                 style: const TextStyle(
                                     fontSize: 18,
                                     fontFamily: fontFamily,
@@ -132,50 +132,50 @@ class _CustomDrawerState extends State<CustomDrawer> {
                 imageIcon: "assets/icons/ic_home.png",
                 title: 'Home',
               ),
-              DrawerTile(
-                isCurrent: indexState == 01,
-                onTap: () {
-                  context.read<DrawerCubit>().updateIndex(02 - 1);
-                  context.read<BottomNavBarCubit>().updateIndex(04);
+              // DrawerTile(
+              //   isCurrent: indexState == 01,
+              //   onTap: () {
+              //     context.read<DrawerCubit>().updateIndex(02 - 1);
+              //     context.read<BottomNavBarCubit>().updateIndex(04);
 
-                  context.pop();
-                },
-                imageIcon: "assets/icons/ic_tv_show.png",
-                title: 'TV Shows',
-              ),
-              DrawerTile(
-                isCurrent: indexState == 02,
-                onTap: () {
-                  context.read<DrawerCubit>().updateIndex(03 - 1);
-                  context.read<BottomNavBarCubit>().updateIndex(5);
+              //     context.pop();
+              //   },
+              //   imageIcon: "assets/icons/ic_tv_show.png",
+              //   title: 'TV Shows',
+              // ),
+              // DrawerTile(
+              //   isCurrent: indexState == 02,
+              //   onTap: () {
+              //     context.read<DrawerCubit>().updateIndex(03 - 1);
+              //     context.read<BottomNavBarCubit>().updateIndex(5);
 
-                  context.pop();
-                },
-                imageIcon: "assets/icons/ic_movie.png",
-                title: 'Events',
-              ),
-              DrawerTile(
-                isCurrent: indexState == 03,
-                onTap: () {
-                  context.read<DrawerCubit>().updateIndex(04 - 1);
-                  context.read<BottomNavBarCubit>().updateIndex(6);
+              //     context.pop();
+              //   },
+              //   imageIcon: "assets/icons/ic_movie.png",
+              //   title: 'Events',
+              // ),
+              // DrawerTile(
+              //   isCurrent: indexState == 03,
+              //   onTap: () {
+              //     context.read<DrawerCubit>().updateIndex(04 - 1);
+              //     context.read<BottomNavBarCubit>().updateIndex(6);
 
-                  context.pop();
-                },
-                imageIcon: "assets/icons/ic_sport.png",
-                title: 'Sports',
-              ),
-              DrawerTile(
-                isCurrent: indexState == 04,
-                onTap: () {
-                  context.read<DrawerCubit>().updateIndex(05 - 1);
-                  context.read<BottomNavBarCubit>().updateIndex(7);
+              //     context.pop();
+              //   },
+              //   imageIcon: "assets/icons/ic_sport.png",
+              //   title: 'Sports',
+              // ),
+              // DrawerTile(
+              //   isCurrent: indexState == 04,
+              //   onTap: () {
+              //     context.read<DrawerCubit>().updateIndex(05 - 1);
+              //     context.read<BottomNavBarCubit>().updateIndex(7);
 
-                  context.pop();
-                },
-                imageIcon: "assets/icons/ic_tv_show.png",
-                title: 'Live TV & Radio',
-              ),
+              //     context.pop();
+              //   },
+              //   imageIcon: "assets/icons/ic_tv_show.png",
+              //   title: 'Live TV & Radio',
+              // ),
               isAuthenticated
                   ? DrawerTile(
                       isCurrent: indexState == 06,

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -9,9 +11,38 @@ import 'package:video_stream_clone/src/data/graphql/slider_queries.dart';
 import 'package:video_stream_clone/src/data/models/slider_item.dart';
 
 class ShowsSlider extends StatelessWidget {
-  final GraphQLClient client; // <-- Inject the client
+  final GraphQLClient client;
 
   const ShowsSlider({super.key, required this.client});
+
+  // Helper to encode URLs with spaces or special characters
+  String? encodeUrl(String? url) {
+    if (url == null) return null;
+    return Uri.encodeFull(url);
+  }
+
+  // Helper to show GraphQL data in an AlertDialog
+  void showDataDialog(BuildContext context, Map<String, dynamic> data) {
+    final jsonString = const JsonEncoder.withIndent('  ').convert(data);
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("GraphQL Data"),
+          content: SingleChildScrollView(
+            child: Text(jsonString),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text("Close"),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,10 +56,8 @@ class ShowsSlider extends StatelessWidget {
         options: QueryOptions(
           document: gql(findAllSlidersQuery),
         ),
-        builder: (QueryResult result,
-            {VoidCallback? refetch, FetchMore? fetchMore}) {
+        builder: (result, {refetch, fetchMore}) {
           if (result.isLoading) {
-            // Shimmer placeholders while loading
             return CarouselSlider.builder(
               itemCount: 5,
               options: CarouselOptions(
@@ -42,44 +71,12 @@ class ShowsSlider extends StatelessWidget {
                   child: Shimmer.fromColors(
                     baseColor: Colors.grey[800]!,
                     highlightColor: Colors.grey[600]!,
-                    child: Stack(
-                      children: [
-                        Material(
-                          elevation: 5,
-                          borderRadius: BorderRadius.circular(12),
-                          child: Container(
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              color: Colors.grey[700],
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          right: 14.w,
-                          top: 30.h,
-                          child: Container(
-                            height: 27.h,
-                            width: 27.h,
-                            decoration: const BoxDecoration(
-                              color: Colors.grey,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          left: 16.w,
-                          bottom: 20.h,
-                          child: Container(
-                            height: 16.h,
-                            width: 120.w,
-                            decoration: BoxDecoration(
-                              color: Colors.grey[600],
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                          ),
-                        ),
-                      ],
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.grey[700],
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      width: double.infinity,
                     ),
                   ),
                 );
@@ -91,14 +88,24 @@ class ShowsSlider extends StatelessWidget {
             return Center(child: Text(result.exception.toString()));
           }
 
-          final List slidersData =
-              (result.data?['findAllSliders'] as List<dynamic>?) ?? [];
+          // Show the fetched data in an alert dialog
+          if (result.data != null) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              // showDataDialog(context, result.data!);
+            });
+          }
 
-          final sliders =
-              slidersData.map((e) => SliderItem.fromJson(e)).toList();
+          // Correct path for the API response
+          final List rawList =
+              (result.data?['findAllVideoByRestrictedCountry'] as List<dynamic>?) ?? [];
+
+          final sliders = rawList
+              .map((e) => SliderItem.fromJson(e))
+              .where((item) => item.status == 1)
+              .toList();
 
           if (sliders.isEmpty) {
-            return const Center(child: Text("No sliders available"));
+            return const Center(child: Text("No active sliders"));
           }
 
           return CarouselSlider.builder(
@@ -107,35 +114,62 @@ class ShowsSlider extends StatelessWidget {
               enlargeCenterPage: true,
               height: 170.h,
               viewportFraction: 0.78,
-              autoPlayInterval: const Duration(seconds: 7),
               autoPlay: true,
+              autoPlayInterval: const Duration(seconds: 7),
             ),
-            itemBuilder: (BuildContext context, int index, int realIndex) {
+            itemBuilder: (context, index, realIndex) {
               final item = sliders[index];
-              final borderRadius =
-                  BorderRadius.circular(realIndex == index ? 12 : 8);
 
               return Stack(
                 children: [
+                  // Banner Image
                   Padding(
                     padding: EdgeInsets.only(top: 20.h, bottom: 10.h),
-                    child: Material(
-                      elevation: 5,
-                      borderRadius: borderRadius,
-                      child: ClipRRect(
-                        borderRadius: borderRadius,
-                        child: FadeInImage.assetNetwork(
-                          placeholder: 'assets/images/placeholder.png',
-                          image: item.imageLink ??
-                              'https://via.placeholder.com/300',
-                          fit: BoxFit.cover,
-                          width: double.infinity,
-                          height: double.infinity,
-                          fadeInDuration: const Duration(milliseconds: 500),
-                        ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Stack(
+                        children: [
+                          FadeInImage.assetNetwork(
+                            placeholder: 'https://via.placeholder.com/300',
+                            image: encodeUrl(item.banner) ?? '',
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            height: double.infinity,
+                            fadeInDuration: const Duration(milliseconds: 500),
+                            imageErrorBuilder: (_, __, ___) {
+                              return Image.network(
+                                'https://via.placeholder.com/300',
+                                fit: BoxFit.cover,
+                                width: double.infinity,
+                                height: double.infinity,
+                              );
+                            },
+                          ),
+                          // Gradient overlay at the bottom
+                          Positioned(
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            height: 60.h,
+                            child: Container(
+                              decoration: const BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [
+                                    Colors.transparent,
+                                    Colors.black54,
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
+
+                  // Subscribe Button Overlay
                   Positioned(
                     right: 14.w,
                     top: 30.h,
@@ -154,15 +188,45 @@ class ShowsSlider extends StatelessWidget {
                       ),
                     ),
                   ),
+
+                  // Name + Short Description Overlay
                   Positioned(
                     left: 16.w,
-                    bottom: 20.h,
-                    child: Text(
-                      item.name,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    bottom: 16.h,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          item.name,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16.sp,
+                            shadows: const [
+                              Shadow(
+                                blurRadius: 2,
+                                color: Colors.black,
+                                offset: Offset(1, 1),
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (item.shortDescription != null) ...[
+                          SizedBox(height: 2.h),
+                          SizedBox(
+                            width: 200.w,
+                            child: Text(
+                              item.shortDescription!,
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: 12.sp,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                   ),
                 ],
