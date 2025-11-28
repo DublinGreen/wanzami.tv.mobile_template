@@ -20,9 +20,12 @@ import 'package:video_stream_clone/src/presentation/privacy_policy/privacy_polic
 import 'package:video_stream_clone/src/presentation/settings/settings_page.dart';
 import 'package:video_stream_clone/src/presentation/sports/sports_page.dart';
 import 'package:video_stream_clone/src/presentation/tv_shows/tv_shows.dart';
+import 'package:graphql_flutter/graphql_flutter.dart';
 
 class MainPage extends StatefulWidget {
-  const MainPage({super.key});
+  final GraphQLClient dataClient;
+
+  const MainPage({super.key, required this.dataClient});
 
   @override
   State<MainPage> createState() => _MainPageState();
@@ -30,47 +33,49 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   bool isSearch = false;
-  List pages = [
-    const HomePage(), // 0
-    const MyWatchList(), // 1               // account pages in both logged or not
-    const AccountPage(), // 2               // account pages in both logged or not
-    const SettingsPage(), // 3
-    const TvShowsPage(), // 4
-    const TvEventsPage(), // 5
-    const SportsPage(), // 6
-    const LiveTvAndRadioPage(), // 7
-    const DashBoardPage(), // 8
-    const PrivacyPolicy(), // 9
-    const AboutPage(), // 10
-    const Placeholder() // Podcast Page (Soon . . .)
-  ];
+  late final List<Widget> pages;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Initialize pages here because widget is available
+    pages = [
+      HomePage(dataClient: widget.dataClient), // Pass the GraphQL client
+      const MyWatchList(),
+      const AccountPage(),
+      const SettingsPage(),
+      const TvShowsPage(),
+      const TvEventsPage(),
+      const SportsPage(),
+      const LiveTvAndRadioPage(),
+      const DashBoardPage(),
+      const PrivacyPolicy(),
+      const AboutPage(),
+      const Placeholder(), // Podcast Page (Soon . . .)
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<BottomNavBarCubit, int>(
       builder: (context, indexState) {
         return Scaffold(
-          bottomNavigationBar: CustomBottomNavBar(
-            indexState: indexState,
-          ),
-          drawer: const SafeArea(
-            child: CustomDrawer(),
-          ),
+          bottomNavigationBar: CustomBottomNavBar(indexState: indexState),
+          drawer: SafeArea(child: CustomDrawer(dataClient: widget.dataClient)),
           backgroundColor: AppColor.backgroundColor,
           appBar: isSearch
               ? AppBar(
                   leading: IconButton(
-                      onPressed: () {
-                        setState(() {
-                          isSearch = false;
-                        });
-                      },
-                      icon: const FaIcon(
-                        FontAwesomeIcons.arrowLeft,
-                        color: Colors.white,
-                        size: 19,
-                      )),
-                  flexibleSpace: Container(
-                    decoration: const BoxDecoration(
+                    onPressed: () => setState(() => isSearch = false),
+                    icon: const FaIcon(
+                      FontAwesomeIcons.arrowLeft,
+                      color: Colors.white,
+                      size: 19,
+                    ),
+                  ),
+                  flexibleSpace: const DecoratedBox(
+                    decoration: BoxDecoration(
                         gradient: AppColor.linearGradientPrimary),
                   ),
                   title: TextField(
@@ -92,44 +97,20 @@ class _MainPageState extends State<MainPage> {
                   ),
                 )
               : AppBar(
-                  leading: Builder(builder: (context) {
-                    return IconButton(
+                  leading: Builder(
+                    builder: (context) => IconButton(
                       icon: Image.asset(
                         "assets/icons/ic_side_nav.png",
                         height: 35,
                         width: 35,
                       ),
-                      onPressed: () {
-                        Scaffold.of(context).openDrawer();
-                      },
-                    );
-                  }),
+                      onPressed: () => Scaffold.of(context).openDrawer(),
+                    ),
+                  ),
                   title: Transform.translate(
                     offset: Offset(0, -3.h),
                     child: Text(
-                      indexState == 0
-                          ? "Home"
-                          : indexState == 01
-                              ? "Watchlist"
-                              : indexState == 02
-                                  ? "Account"
-                                  : indexState == 03
-                                      ? "Settings"
-                                      : indexState == 4
-                                          ? "TV Shows"
-                                          : indexState == 5
-                                              ? "Events"
-                                              : indexState == 6
-                                                  ? "Sports"
-                                                  : indexState == 7
-                                                      ? "Live TV & Radio"
-                                                      : indexState == 8
-                                                          ? "Dashboard"
-                                                          : indexState == 9
-                                                              ? "Privacy Policy"
-                                                              : indexState == 10
-                                                                  ? "About"
-                                                                  : "Podcast",
+                      _getAppBarTitle(indexState),
                       style: const TextStyle(
                           color: Colors.white,
                           fontFamily: fontFamily,
@@ -143,16 +124,12 @@ class _MainPageState extends State<MainPage> {
                         height: 35,
                         width: 35,
                       ),
-                      onPressed: () {
-                        setState(() {
-                          isSearch = true;
-                        });
-                      },
+                      onPressed: () => setState(() => isSearch = true),
                     ),
                     SizedBox(width: 5.w),
                   ],
-                  flexibleSpace: Container(
-                    decoration: const BoxDecoration(
+                  flexibleSpace: const DecoratedBox(
+                    decoration: BoxDecoration(
                         gradient: AppColor.linearGradientPrimary),
                   ),
                 ),
@@ -160,5 +137,34 @@ class _MainPageState extends State<MainPage> {
         );
       },
     );
+  }
+
+  String _getAppBarTitle(int index) {
+    switch (index) {
+      case 0:
+        return "Home";
+      case 1:
+        return "Watchlist";
+      case 2:
+        return "Account";
+      case 3:
+        return "Settings";
+      case 4:
+        return "TV Shows";
+      case 5:
+        return "Events";
+      case 6:
+        return "Sports";
+      case 7:
+        return "Live TV & Radio";
+      case 8:
+        return "Dashboard";
+      case 9:
+        return "Privacy Policy";
+      case 10:
+        return "About";
+      default:
+        return "Podcast";
+    }
   }
 }

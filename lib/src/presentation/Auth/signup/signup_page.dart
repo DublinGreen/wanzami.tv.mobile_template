@@ -7,9 +7,12 @@ import 'package:video_stream_clone/src/core/app_const.dart';
 import 'package:video_stream_clone/src/core/app_extension.dart';
 import 'package:video_stream_clone/src/presentation/privacy_policy/helper/router.dart';
 import 'package:video_stream_clone/src/presentation/Auth/signin/signin_page.dart';
+import 'package:graphql_flutter/graphql_flutter.dart';
 
 class SignUpPage extends StatefulWidget {
-  const SignUpPage({super.key});
+  final GraphQLClient dataClient;
+
+  const SignUpPage({super.key, required this.dataClient});
 
   @override
   State<SignUpPage> createState() => _SignUpPageState();
@@ -269,7 +272,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     InkWell(
                       onTap: () {
                         Navigator.push(
-                            context, CustomRouter(widget: const SignInPage()));
+                            context, CustomRouter(widget: SignInPage(client: widget.dataClient)));
                       },
                       child: ShaderMask(
                         shaderCallback: (rect) {

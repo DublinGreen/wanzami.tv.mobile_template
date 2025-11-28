@@ -12,11 +12,13 @@ import 'package:video_stream_clone/src/presentation/privacy_policy/helper/router
 import 'package:video_stream_clone/src/presentation/Auth/signin/signin_page.dart';
 import 'package:video_stream_clone/src/presentation/dashboard/dashboard_page.dart';
 import 'package:video_stream_clone/src/presentation/profile/profile_page.dart';
+import 'package:graphql_flutter/graphql_flutter.dart';
 
 class CustomDrawer extends StatefulWidget {
-  const CustomDrawer({
-    super.key,
-  });
+  final GraphQLClient dataClient;
+
+  const CustomDrawer({super.key, required this.dataClient});
+
 
   @override
   State<CustomDrawer> createState() => _CustomDrawerState();
@@ -224,7 +226,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                 onTap: () {
                   context.pop();
                   Navigator.pushReplacement(
-                      context, CustomRouter(widget: const SignInPage()));
+                      context, CustomRouter(widget: SignInPage(client: widget.dataClient)));
                 },
                 imageIcon: "assets/icons/ic_login.png",
                 title: 'Login',

@@ -15,7 +15,9 @@ import 'package:video_stream_clone/src/presentation/Auth/signup/signup_page.dart
 import 'package:graphql_flutter/graphql_flutter.dart';
 
 class SignInPage extends StatefulWidget {
-  const SignInPage({super.key});
+  final GraphQLClient client; // <-- Inject the client
+
+  const SignInPage({super.key, required this.client});
 
   @override
   State<SignInPage> createState() => _SignInPageState();
@@ -40,7 +42,7 @@ class _SignInPageState extends State<SignInPage> {
   Future<void> loginUser() async {
     setState(() => isLoading = true);
 
-    final HttpLink httpLink = HttpLink('http://localhost:5000/graphql');
+    final HttpLink httpLink = HttpLink(authAPI);
     final GraphQLClient client = GraphQLClient(
       link: httpLink,
       cache: GraphQLCache(),
@@ -133,7 +135,7 @@ class _SignInPageState extends State<SignInPage> {
                       InkWell(
                         onTap: () {
                           Navigator.pushReplacement(
-                              context, CustomRouter(widget: const MainPage()));
+                              context, CustomRouter(widget: MainPage(dataClient: widget.client)));
                         },
                         child: ShaderMask(
                           shaderCallback: (rect) {
@@ -380,7 +382,7 @@ class _SignInPageState extends State<SignInPage> {
                       InkWell(
                         onTap: () {
                           Navigator.push(context,
-                              CustomRouter(widget: const SignUpPage()));
+                              CustomRouter(widget: SignUpPage(dataClient: widget.client)));
                         },
                         child: ShaderMask(
                           shaderCallback: (rect) {
