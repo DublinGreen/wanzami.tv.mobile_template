@@ -10,6 +10,8 @@ import 'package:video_stream_clone/src/core/app_color.dart';
 import 'package:video_stream_clone/src/data/graphql/slider_queries.dart';
 import 'package:video_stream_clone/src/data/models/slider_item.dart';
 
+import 'package:cached_network_image/cached_network_image.dart';
+
 class ShowsSlider extends StatelessWidget {
   final GraphQLClient client;
 
@@ -129,21 +131,38 @@ class ShowsSlider extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                       child: Stack(
                         children: [
-                          FadeInImage.assetNetwork(
-                            placeholder: 'https://via.placeholder.com/300',
-                            image: encodeUrl(item.banner) ?? '',
+                          // FadeInImage.assetNetwork(
+                          //   placeholder: 'https://via.placeholder.com/300',
+                          //   image: encodeUrl(item.banner) ?? '',
+                          //   fit: BoxFit.cover,
+                          //   width: double.infinity,
+                          //   height: double.infinity,
+                          //   fadeInDuration: const Duration(milliseconds: 500),
+                          //   imageErrorBuilder: (_, __, ___) {
+                          //     return Image.network(
+                          //       'https://via.placeholder.com/300',
+                          //       fit: BoxFit.cover,
+                          //       width: double.infinity,
+                          //       height: double.infinity,
+                          //     );
+                          //   },
+                          // ),
+                          CachedNetworkImage(
+                            imageUrl: encodeUrl(item.banner) ?? '',
                             fit: BoxFit.cover,
                             width: double.infinity,
                             height: double.infinity,
-                            fadeInDuration: const Duration(milliseconds: 500),
-                            imageErrorBuilder: (_, __, ___) {
-                              return Image.network(
-                                'https://via.placeholder.com/300',
-                                fit: BoxFit.cover,
-                                width: double.infinity,
-                                height: double.infinity,
-                              );
-                            },
+
+                            placeholder: (context, url) => Shimmer.fromColors(
+                              baseColor: Colors.grey[800]!,
+                              highlightColor: Colors.grey[600]!,
+                              child: Container(color: Colors.grey[700]),
+                            ),
+
+                            errorWidget: (context, url, error) => Image.network(
+                              'https://via.placeholder.com/300',
+                              fit: BoxFit.cover,
+                            ),
                           ),
                           // Gradient overlay at the bottom
                           Positioned(

@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 
 const fontFamily = 'CustomFont';
 
-const authAPI = 'http://localhost:5000/graphql';
+const authAPI = 'https://auth.wanzami.tv/graphql';
 const dataAPI = 'http://api.wanzami.tv/graphql';
 
 List sliderColors = [

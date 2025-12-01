@@ -81,14 +81,22 @@ class _MainPageState extends State<MainPage> {
                   title: TextField(
                     cursorColor: AppColor.pinkColor,
                     keyboardType: TextInputType.name,
+                    style: const TextStyle(
+                      color:AppColor.pinkColor,
+                      fontFamily: fontFamily,
+                      fontWeight: FontWeight.w400,
+                      fontSize: 19,
+                    ),
                     decoration: InputDecoration(
                       isDense: true,
                       hintText: 'Search...',
                       hintStyle: TextStyle(
-                          color: Colors.white.withOpacity(0.5),
+                          color: AppColor.pinkColor.withOpacity(0.5),
                           fontFamily: fontFamily,
                           fontWeight: FontWeight.w100,
                           fontSize: 19),
+                      // filled: true, // <-- Enable background color
+                      // fillColor: Colors.orange, // <-- Set the background color here
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(7.0),
                         borderSide: BorderSide.none,
@@ -107,7 +115,8 @@ class _MainPageState extends State<MainPage> {
                       onPressed: () => Scaffold.of(context).openDrawer(),
                     ),
                   ),
-                  title: Transform.translate(
+            backgroundColor: AppColor.pinkColor, // <-- Set the background color here for the Top App Bar
+            title: Transform.translate(
                     offset: Offset(0, -3.h),
                     child: Text(
                       _getAppBarTitle(indexState),

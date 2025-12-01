@@ -29,12 +29,12 @@ class HomePage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildSectionTitle("Upcoming Events"),
+                _buildSectionTitle("Newest releases"),
                 SizedBox(height: 10.h),
                 _buildHorizontalMovieList(itemCount: 8, subscribeIndex: 4),
                 SizedBox(height: 10.h),
 
-                _buildSectionTitle("Upcoming Shows"),
+                _buildSectionTitle("Wanzami Original"),
                 SizedBox(height: 10.h),
                 _buildHorizontalWideList(itemCount: 8, subscribeIndex: 1),
                 SizedBox(height: 10.h),
