@@ -348,14 +348,14 @@ class _SignInPageState extends State<SignInPage> {
                   SizedBox(height: 20.h),
                   Row(
                     children: [
-                      SignInSocialButton(
-                        mainColor: const Color.fromRGBO(56, 125, 242, 1),
-                        subColor: const Color.fromRGBO(81, 142, 248, 1),
-                        text: 'Facebook',
-                        onTap: () {},
-                        icon: FontAwesomeIcons.facebookF,
-                      ),
-                      SizedBox(width: 20.w),
+                      // SignInSocialButton(
+                      //   mainColor: const Color.fromRGBO(56, 125, 242, 1),
+                      //   subColor: const Color.fromRGBO(81, 142, 248, 1),
+                      //   text: 'Facebook',
+                      //   onTap: () {},
+                      //   icon: FontAwesomeIcons.facebookF,
+                      // ),
+                      // SizedBox(width: 20.w),
                       SignInSocialButton(
                         mainColor: const Color.fromRGBO(209, 54, 42, 1),
                         subColor: const Color.fromRGBO(241, 68, 54, 1),

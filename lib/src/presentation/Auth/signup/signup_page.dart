@@ -19,8 +19,96 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> {
-  bool isRememberMe = true;
-  bool isAcceptPrivicay = true;
+  final firstNameCtrl = TextEditingController();
+  final lastNameCtrl = TextEditingController();
+  final emailCtrl = TextEditingController();
+  final passwordCtrl = TextEditingController();
+  final confirmCtrl = TextEditingController();
+
+  final _formKey = GlobalKey<FormState>();
+
+  bool isAcceptPrivacy = true;
+  bool isLoading = false;
+
+  static const String signupUserQuery = r'''
+    mutation CreateUser($firstName: String!, $lastName: String!, $email: String!, $password: String!) {
+      createUser(
+        firstName: $firstName
+        lastName: $lastName
+        email: $email
+        password: $password
+      ) {
+        id
+        firstName
+        lastName
+        email
+        role
+      }
+    }
+  ''';
+
+  Future<void> _registerUser() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    if (!isAcceptPrivacy) {
+      _showSnack("Accept Terms & Privacy Policy");
+      return;
+    }
+
+    setState(() => isLoading = true);
+
+    try {
+      final result = await widget.dataClient.mutate(
+        MutationOptions(
+          document: gql(signupUserQuery),
+          variables: {
+            "firstName": firstNameCtrl.text.trim(),
+            "lastName": lastNameCtrl.text.trim(),
+            "email": emailCtrl.text.trim(),
+            "password": passwordCtrl.text,
+          },
+        ),
+      );
+
+      if (result.hasException) {
+        final msg = result.exception!.graphqlErrors.isNotEmpty
+            ? result.exception!.graphqlErrors.first.message
+            : "Registration failed";
+
+        _showSnack(msg);
+      } else {
+        final user = result.data?['createUser'];
+        _showSnack("Welcome ${user['firstName']} 🎉");
+
+        Navigator.pushReplacement(
+          context,
+          CustomRouter(widget: SignInPage(client: widget.dataClient)),
+        );
+      }
+    } finally {
+      setState(() => isLoading = false);
+    }
+  }
+
+  void _showSnack(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(msg)),
+    );
+  }
+
+  bool _isValidEmail(String email) {
+    return RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(email);
+  }
+
+  @override
+  void dispose() {
+    firstNameCtrl.dispose();
+    lastNameCtrl.dispose();
+    emailCtrl.dispose();
+    passwordCtrl.dispose();
+    confirmCtrl.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,282 +118,229 @@ class _SignUpPageState extends State<SignUpPage> {
         body: Padding(
           padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 30.h),
           child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  height: 10.h,
-                ),
-                const Text(
-                  "Sign Up",
-                  style: TextStyle(
-                      fontFamily: fontFamily,
-                      fontSize: 26,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold),
-                ),
-                SizedBox(
-                  height: 70.h,
-                ),
-                Transform.scale(
-                  scaleY: 0.9,
-                  child: TextField(
-                    cursorColor: Colors.white,
-                    keyboardType: TextInputType.name,
-                    decoration: InputDecoration(
-                      isDense: true,
-                      hintText: 'Name',
-
-                      hintStyle: const TextStyle(
-                          color: Colors.white,
-                          fontFamily: fontFamily,
-                          fontWeight: FontWeight.w100,
-                          fontSize: 17),
-
-                      prefixIcon: Transform.scale(
-                          scale: 0.7,
-                          child: Image.asset("assets/icons/ic_user.png")),
-
-                      filled: true,
-                      fillColor: const Color.fromRGBO(
-                          54, 61, 80, 1), // Blue Grey background color
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(7.0),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: 10.h),
+                  const Text(
+                    "Sign Up",
+                    style: TextStyle(
+                        fontFamily: fontFamily,
+                        fontSize: 26,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold),
                   ),
-                ),
-                SizedBox(
-                  height: 10.h,
-                ),
-                Transform.scale(
-                  scaleY: 0.9,
-                  child: TextField(
-                    cursorColor: Colors.white,
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: InputDecoration(
-                      isDense: true,
-                      hintText: 'Email',
+                  SizedBox(height: 70.h),
 
-                      hintStyle: const TextStyle(
-                          color: Colors.white,
-                          fontFamily: fontFamily,
-                          fontWeight: FontWeight.w100,
-                          fontSize: 17),
-
-                      prefixIcon: Transform.scale(
-                          scale: 0.7,
-                          child: Image.asset("assets/icons/ic_email.png")),
-
-                      filled: true,
-                      fillColor: const Color.fromRGBO(
-                          54, 61, 80, 1), // Blue Grey background color
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(7.0),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
+                  _buildField(
+                    hint: "First Name",
+                    icon: "assets/icons/ic_user.png",
+                    controller: firstNameCtrl,
+                    validator: (v) => v!.isEmpty ? "Enter first name" : null,
                   ),
-                ),
-                SizedBox(
-                  height: 10.h,
-                ),
-                Transform.scale(
-                  scaleY: 0.9,
-                  child: TextField(
-                    obscureText: true,
-                    cursorColor: Colors.white,
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: InputDecoration(
-                      isDense: true,
-                      hintText: 'Password',
+                  SizedBox(height: 10.h),
 
-                      hintStyle: const TextStyle(
-                          color: Colors.white,
-                          fontFamily: fontFamily,
-                          fontWeight: FontWeight.w100,
-                          fontSize: 17),
-
-                      prefixIcon: Transform.scale(
-                          scale: 0.7,
-                          child: Image.asset("assets/icons/ic_password.png")),
-
-                      filled: true,
-                      fillColor: const Color.fromRGBO(
-                          54, 61, 80, 1), // Blue Grey background color
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(7.0),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
+                  _buildField(
+                    hint: "Last Name",
+                    icon: "assets/icons/ic_user.png",
+                    controller: lastNameCtrl,
+                    validator: (v) => v!.isEmpty ? "Enter last name" : null,
                   ),
-                ),
-                SizedBox(
-                  height: 10.h,
-                ),
-                Transform.scale(
-                  scaleY: 0.9,
-                  child: TextField(
-                    obscureText: true,
-                    cursorColor: Colors.white,
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: InputDecoration(
-                      isDense: true,
-                      hintText: 'Confirm Password',
+                  SizedBox(height: 10.h),
 
-                      hintStyle: const TextStyle(
-                          color: Colors.white,
-                          fontFamily: fontFamily,
-                          fontWeight: FontWeight.w100,
-                          fontSize: 17),
-
-                      prefixIcon: Transform.scale(
-                          scale: 0.7,
-                          child: Image.asset("assets/icons/ic_password.png")),
-
-                      filled: true,
-                      fillColor: const Color.fromRGBO(
-                          54, 61, 80, 1), // Blue Grey background color
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(7.0),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
+                  _buildField(
+                    hint: "Email",
+                    icon: "assets/icons/ic_email.png",
+                    controller: emailCtrl,
+                    keyboard: TextInputType.emailAddress,
+                    validator: (v) {
+                      if (v!.isEmpty) return "Enter email";
+                      if (!_isValidEmail(v)) return "Invalid email";
+                      return null;
+                    },
                   ),
-                ),
-                SizedBox(
-                  height: 15.h,
-                ),
-                Transform.translate(
-                  offset: Offset(-8.w, 0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Checkbox(
-                        value: isAcceptPrivicay,
+                  SizedBox(height: 10.h),
 
-                        onChanged: (newValue) {
-                          // Update the state when the checkbox is toggled
-                          setState(() {
-                            isAcceptPrivicay = newValue!;
-                          });
-                        },
-                        side: WidgetStateBorderSide.resolveWith(
-                          (states) =>
-                              const BorderSide(width: 2.0, color: Colors.white),
+                  _buildField(
+                    hint: "Password",
+                    icon: "assets/icons/ic_password.png",
+                    controller: passwordCtrl,
+                    obscure: true,
+                    validator: (v) {
+                      if (v!.isEmpty) return "Enter password";
+                      if (v.length < 6) return "At least 6 characters";
+                      return null;
+                    },
+                  ),
+                  SizedBox(height: 10.h),
+
+                  _buildField(
+                    hint: "Confirm Password",
+                    icon: "assets/icons/ic_password.png",
+                    controller: confirmCtrl,
+                    obscure: true,
+                    validator: (v) {
+                      if (v!.isEmpty) return "Confirm password";
+                      if (v != passwordCtrl.text) return "Passwords do not match";
+                      return null;
+                    },
+                  ),
+                  SizedBox(height: 15.h),
+
+                  Transform.translate(
+                    offset: Offset(-8.w, 0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Checkbox(
+                          value: isAcceptPrivacy,
+                          onChanged: (newValue) {
+                            setState(() => isAcceptPrivacy = newValue!);
+                          },
+                          side: WidgetStateBorderSide.resolveWith(
+                                (states) => const BorderSide(width: 2.0, color: Colors.white),
+                          ),
+                          checkColor: Colors.black,
+                          activeColor: Colors.white,
                         ),
-                        checkColor: Colors.black,
-                        activeColor:
-                            Colors.white, // Color of the checkbox when checked
-                      ),
-                      Expanded(
-                        child: RichText(
-                          text: TextSpan(
-                            style: const TextStyle(
-                              fontFamily: fontFamily,
-                              fontSize: 15.5,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.white, // Default text color
+                        Expanded(
+                          child: RichText(
+                            text: TextSpan(
+                              style: const TextStyle(
+                                fontFamily: fontFamily,
+                                fontSize: 15.5,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white,
+                              ),
+                              children: [
+                                const TextSpan(text: 'By Signing in you accept '),
+                                TextSpan(
+                                  text: 'Terms',
+                                  style: const TextStyle(
+                                    color: AppColor.pinkColor,
+                                    decoration: TextDecoration.underline,
+                                  ),
+                                ),
+                                const TextSpan(text: ' and '),
+                                TextSpan(
+                                  text: 'Privacy Policy',
+                                  style: const TextStyle(
+                                    color: Colors.pink,
+                                    decoration: TextDecoration.underline,
+                                  ),
+                                ),
+                              ],
                             ),
-                            children: [
-                              const TextSpan(
-                                text: 'By Signing in you accept ',
-                              ),
-                              TextSpan(
-                                text: 'Terms',
-                                style: const TextStyle(
-                                  color: AppColor.pinkColor,
-                                  decoration: TextDecoration.underline,
-                                ),
-                                recognizer: TapGestureRecognizer()
-                                  ..onTap = () {
-                                    // Handle Terms click
-                                  },
-                              ),
-                              const TextSpan(
-                                text: ' and ',
-                              ),
-                              TextSpan(
-                                text: 'Privacy Policy',
-                                style: const TextStyle(
-                                  color: Colors.pink,
-                                  decoration: TextDecoration.underline,
-                                ),
-                                recognizer: TapGestureRecognizer()
-                                  ..onTap = () {
-                                    // Handle Privacy Policy click
-                                  },
-                              ),
-                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 25.h),
+
+                  /// ✅ FIXED onTap for CustomPrimaryButton
+                  CustomPrimaryButton(
+                    text: isLoading ? "PLEASE WAIT..." : "REGISTER",
+                    onTap: () {
+                      if (!isLoading) _registerUser();
+                    },
+                  ),
+
+                  SizedBox(height: 30.h),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                        "Don't have an account?",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontFamily: fontFamily,
+                          fontSize: 13.3,
+                          color: Colors.white,
+                        ),
+                      ),
+                      SizedBox(width: 7.w),
+                      InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            CustomRouter(widget: SignInPage(client: widget.dataClient)),
+                          );
+                        },
+                        child: ShaderMask(
+                          shaderCallback: (rect) {
+                            return AppColor.linearGradientPrimary.createShader(rect);
+                          },
+                          child: const Text(
+                            'Login',
+                            style: TextStyle(
+                              fontFamily: fontFamily,
+                              fontSize: 16.5,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),
                     ],
                   ),
-                ),
-                SizedBox(
-                  height: 25.h,
-                ),
-                CustomPrimaryButton(
-                  text: "REGISTER",
-                  onTap: () {},
-                ),
-                SizedBox(
-                  height: 30.h,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text(
-                      "Don't have an account?",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontFamily: fontFamily,
-                        fontSize: 13.3,
-                        color: Colors.white,
-                      ),
-                    ),
-                    SizedBox(
-                      width: 7.w,
-                    ),
-                    InkWell(
-                      onTap: () {
-                        Navigator.push(
-                            context, CustomRouter(widget: SignInPage(client: widget.dataClient)));
-                      },
-                      child: ShaderMask(
-                        shaderCallback: (rect) {
-                          return AppColor.linearGradientPrimary
-                              .createShader(rect);
-                        },
-                        child: const Text(
-                          'Login',
-                          style: TextStyle(
-                            fontFamily: fontFamily,
-                            fontSize: 16.5,
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(
-                  height: 10.h,
-                ),
-                Center(
-                  child: Container(
-                    width: context.width / 3.5,
-                    height: 3.h,
-                    decoration: BoxDecoration(
+                  SizedBox(height: 10.h),
+                  Center(
+                    child: Container(
+                      width: context.width / 3.5,
+                      height: 3.h,
+                      decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(3),
-                        gradient: AppColor.linearGradientPrimary),
+                        gradient: AppColor.linearGradientPrimary,
+                      ),
+                    ),
                   ),
-                )
-              ],
+                ],
+              ),
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildField({
+    required String hint,
+    required String icon,
+    required TextEditingController controller,
+    TextInputType keyboard = TextInputType.text,
+    bool obscure = false,
+    String? Function(String?)? validator,
+  }) {
+    return Transform.scale(
+      scaleY: 0.9,
+      child: TextFormField(
+        controller: controller,
+        obscureText: obscure,
+        cursorColor: Colors.white,
+        keyboardType: keyboard,
+        validator: validator,
+        style: const TextStyle(color: Colors.white),
+        decoration: InputDecoration(
+          isDense: true,
+          hintText: hint,
+          hintStyle: const TextStyle(
+            color: Colors.white,
+            fontFamily: fontFamily,
+            fontWeight: FontWeight.w100,
+            fontSize: 17,
+          ),
+          prefixIcon: Transform.scale(
+            scale: 0.7,
+            child: Image.asset(icon),
+          ),
+          filled: true,
+          fillColor: const Color.fromRGBO(54, 61, 80, 1),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(7.0),
+            borderSide: BorderSide.none,
           ),
         ),
       ),

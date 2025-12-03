@@ -1,5 +1,6 @@
-# Sports Video Streaming Flutter Application UI Template
-This repository contains a comprehensive UI template for a sports video streaming application developed using Flutter. Designed for a seamless and immersive user experience, this template provides a robust foundation for creating a sports-focused video streaming app. Key features include:
+# Wanzami Video Streaming Flutter Application
+
+This repository contains a comprehensive UI template for a wanzami video streaming application developed using Flutter. Designed for a seamless and immersive user experience,
 
 - **User-Friendly Interface**: Intuitive navigation and engaging design to enhance user interaction.
 - **Live Streaming**: Real-time streaming capabilities to broadcast sports events.
@@ -12,12 +13,6 @@ This repository contains a comprehensive UI template for a sports video streamin
 - **Dark Mode**: User-friendly dark mode for comfortable viewing in low-light conditions.
 - **Customizable Components**: Highly customizable widgets and components to tailor the app to specific needs.
 - **Radio, Live Streaming, Authentication Screens and more**
-
-# Examine
-![App Screenshot](Screenshot%202024-07-03%20143840.png)
-
-## Full Version
-Ask For The Full Version VIA: [hellalet.younes@gmail.com](mailto:hellalet.younes@gmail.com)
 
 ## License
 This project is licensed under the **MIT** License. Check LICENSE.MD

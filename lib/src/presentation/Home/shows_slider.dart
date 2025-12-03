@@ -7,7 +7,7 @@ import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:shimmer/shimmer.dart';
 
 import 'package:video_stream_clone/src/core/app_color.dart';
-import 'package:video_stream_clone/src/data/graphql/slider_queries.dart';
+import 'package:video_stream_clone/src/data/graphql/slider_query.dart';
 import 'package:video_stream_clone/src/data/models/slider_item.dart';
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -57,6 +57,9 @@ class ShowsSlider extends StatelessWidget {
       child: Query(
         options: QueryOptions(
           document: gql(findAllSlidersQuery),
+          variables: {
+            'country': 'Nigeria',
+          },
         ),
         builder: (result, {refetch, fetchMore}) {
           if (result.isLoading) {
